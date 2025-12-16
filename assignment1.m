@@ -101,6 +101,10 @@ grid on;
 
 
 
+
+
+
+
 %%%  PROBLEM 3 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 Cp = 1.05;   % KJ/Kg.K
@@ -130,6 +134,8 @@ percentage_deviation = ((entropy_change_real-entropy_change_ideal)/abs(entropy_c
 
 
 
+
+
 %%% PROBLEM 4 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
@@ -143,9 +149,9 @@ entropy = @(Te)2.0*log(Te) + 0.001*Te;
 %S_gen = mass_flow*(entropy(T2)-entropy(T1)) - energy/Tb;
 
 
-energy_range =linspace(20e3,100e3,1000);
+energy_range =linspace(20e3,100e3,1000);   % rate of energy in watt
 
-mass_flow = energy_range/(Tb*(entropy(T2)-entropy(T1)));
+mass_flow = energy_range/(Tb*(entropy(T2)-entropy(T1)));   % mass flow rate
 
 figure;
 plot(mass_flow,energy_range,'r--',LineWidth=1.2);
@@ -158,20 +164,22 @@ grid on;
 
 
 
+
+
 %%% PROBLEM 5 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-T0 = 298;
-cp = @(T)1200 + 0.4*T - (1.2e-4)*T.^2;
-equation = @(T)cp(T)./T;
-entropy_change = integral(equation,350,900);
-exergy_destroyed1 = T0*0.02*entropy_change;
-exergy_destroyed2 = T0*0.10*entropy_change;
+T0 = 298; % in kelvin
+cp = @(T)1200 + 0.4*T - (1.2e-4)*T.^2;  % temperature dependent heat capacity
+equation = @(T)cp(T)./T;    % integrand of the integral for entropy change
+entropy_change = integral(equation,350,900);  % entropy change using integral function
+exergy_destroyed1 = T0*0.02*entropy_change;   % exergy destruction with 2% irreversibility
+exergy_destroyed2 = T0*0.10*entropy_change;   % exergy destruction with 10% irreversibility
 
-irre = linspace(0,0.20,100);
-exergy_destroyed = T0*irre*entropy_change;
+irre = linspace(0,0.20,100);    % Spanning irreversibility from 0% to 20%  with 100 equal gaps
+exergy_destroyed = T0*irre*entropy_change; % exrgy destruction between 0% to 20% 
 
 figure;
-plot(irre,exergy_destroyed,'g--')
+plot(irre,exergy_destroyed,'g--')   % pllotting of figure for irreversibility and exegy destruction
 xlabel('irreversibility');
 ylabel('exergy_destroyed');
 title('exergy destruction vs irreversibility level');
@@ -182,27 +190,29 @@ grid on;
 
 
 
+
+
 %%% PROBLEM 6 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-Th = @(t)900 - 300*exp(-0.0008*t);
-Tc = @(t)300 + 40*sin(0.002*t);
+Th = @(t)900 - 300*exp(-0.0008*t);   % higher boundary teperature function of time
+Tc = @(t)300 + 40*sin(0.002*t);    % lower boundary temperature function of time
 
-effic = @(t)1 - (Tc(t)./Th(t));
+effic = @(t)1 - (Tc(t)./Th(t));    % efficiency function of time
 
-Qin = @(t)20000*(1 + 0.3*sin(0.003*t));
+Qin = @(t)20000*(1 + 0.3*sin(0.003*t));   % heat input function of time in kW
 
-power = @(t)effic(t).*Qin(t);
-work = integral(power,0,100);
-time = linspace(0,100,1000);
-power1 = power(time);
-work1 = trapz(time,power1);
+power = @(t)effic(t).*Qin(t);  % power in kW 
+work = integral(power,0,100);  % work in kJ
+time = linspace(0,100,1000);   % time frpm 0s to 100s divided into 1000 equal points
+power1 = power(time);        % power at all points of time
+work1 = trapz(time,power1);  % finding work using trapz function  and all time grid with power at that points
 
-entropy_gen = @(t)(Qin(t)./Th(t) - Qin(t)./Tc(t));
-time1 = linspace(0,100,1000);
-entropy_gen = entropy_gen(time1);
+entropy_gen = @(t)(Qin(t)./Th(t) - Qin(t)./Tc(t));  % rate of entropy generation as a function of time
+time1 = linspace(0,100,1000);   % time grid spanning from 0s to 100s with 1000 equally sapced points
+entropy_gen = entropy_gen(time1); % entropy gen rate at all ponts of time between 0s to 100s 
 
 
-figure;
+figure;      % plotting time vs rate of entropy gen
 plot(time1,entropy_gen,'b-')
 xlabel('time(sec)');
 ylabel('entropy generation (KW/K')
@@ -213,20 +223,22 @@ grid on;
 
 
 
+
+
 %%% PROBLEM 7 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 m = 1.25;
 R = 0.287;
-Pa = 1; Pb = 10; 
-TA = 300;
-TB = (10.^0.2)*TA;
+Pa = 1; Pb = 10;   %pressure in bar
+TA = 300;    % in kelvin
+TB = (10.^0.2)*TA;  % final temperature using polytropic relation
 
- U = @(T)500 + 0.8*T + (1.5e-3)*T.^2;
+ U = @(T)500 + 0.8*T + (1.5e-3)*T.^2;  % internal energy
 
- change_in_U = U(TB)-U(TA);
- W = (R./(1-m))*(TB-TA);
- H = change_in_U + W;
-
+ change_in_U = U(TB)-U(TA);  %change in internal energy(it is state function therefore final - initial)
+ W = (R./(1-m))*(TB-TA);   % work using polytropic relation and then integrating it
+ H = change_in_U + W;    % heat in the process
+ 
 
 
 
@@ -235,30 +247,30 @@ TB = (10.^0.2)*TA;
 
  %%% PROBLEM 8 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
  
- C = 2.5; N = 1000;
- q_total = 5e5;
- Tb = 300;
- tf = 2000;
- dt = tf/N;
- Tf = linspace(0,tf,N);
+ C = 2.5; N = 1000;  % in kJ/K
+ q_total = 5e5;  % in kJ
+ Tb = 300;   % in Kelvin
+ tf = 2000;  % time length in second
+ dt = tf/N;  % differential temperature
+ Tf = linspace(0,tf,N);  % time grid from 0s to 2000s with N equal points in between 
 
- q_uni = q_total/tf * ones(1,N);
- q_opt = linspace(0,2*q_total/tf,N);
- q_opt = q_opt * (q_total/sum(q_opt*dt));
+ q_uni = q_total/tf * ones(1,N);  % uniform heating
+ q_opt = linspace(0,2*q_total/tf,N); % optimal heating descretizing
+ q_opt = q_opt * (q_total/sum(q_opt*dt)); % optimal heating profile 
 
 
- T_uni = T0 + cumsum(q_uni)*dt/C;
- T_opt = T0 + cumsum(q_opt)*dt/C;
+ T_uni = T0 + cumsum(q_uni)*dt/C;  % uniform temperature evolution
+ T_opt = T0 + cumsum(q_opt)*dt/C;  % optimal temperature evolution
 
- S_uni = sum((q_uni./T_uni - q_uni/Tb)*dt);
- S_opt = sum((q_opt./T_opt - q_opt/Tb)*dt);
+ S_uni = sum((q_uni./T_uni - q_uni/Tb)*dt); % uniform entropy 
+ S_opt = sum((q_opt./T_opt - q_opt/Tb)*dt); % optimal entropy
 
- figure;
+ figure; % plotting between time length vs (uniform heat and optimal heat)
  plot(Tf,q_uni,'b--',Tf,q_opt,'LineWidth',1.2);
  xlabel('Time (s)'); ylabel('q(t)');
  legend('Uniform','Optimal'); grid on;
 
- figure;
+ figure;  % plotting between time length vs (uniform temperature evolution and optimal temperature evolution)
  plot(Tf,T_uni,'r--',Tf,T_opt,'LineWidth',1.2);
  xlabel('Time (s)'); ylabel('Temperature (K)');
  legend('Uniform','Optimal'); grid on;
@@ -267,71 +279,72 @@ TB = (10.^0.2)*TA;
 
 
 
+ 
 
  %%% SOLUTION 9 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
  A = 1e5;
  E = 45;  % kJ/mol
- R = 8.314e-3;
+ R = 8.314e-3; % gas constant
  c = 1.8; % kj/K
 
- t_guess = 300;
- tspan = linspace(0,1000,1000);
+ t_guess = 300;  % guess temperature 
+ tspan = linspace(0,1000,1000); % time length from 0s to 1000s with 1000 equal points in between
 
- r = @(Temp)A*exp(-E./(R*Temp));
- differ_T = @(tim,Temp)(r(Temp)+ 2000*exp(-0.001*tim))./c;
+ r = @(Temp)A*exp(-E./(R*Temp)); % modeled heat reaction
+ differ_T = @(tim,Temp)(r(Temp)+ 2000*exp(-0.001*tim))./c; % differential equation as with respect to time(t)
 
- [tim,Temp] = ode45(differ_T,tspan,t_guess);
+ [tim,Temp] = ode45(differ_T,tspan,t_guess);  %solving differential equation using ode45 function
 
- noise_T = Temp.*(1 + 0.01*randn(size(Temp)));
+ noise_T = Temp.*(1 + 0.01*randn(size(Temp))); % addding noise to the temperature-time data
 
- figure;
+ figure;  % plotting time vs (noise temperature and temperature from ode)
  plot(tim,noise_T,'o',tim,Temp,'LineWidth',1.2);
  xlabel('Time (s)'); ylabel('Temperature (K)');
  legend('Noisy data','True');
  grid on;
 
 
+
+
+
+
  %%% SOLUTION 10 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-
- clc; clear; close all;
-
-
-Tc = 270;          % K
-Th = 320;          % K
-alpha = 0.02;
-k = 50;
+Tc = 270;          % lower sink temperature in kelvin 
+Th = 320;          %  higher source temperature in kelvin
+alpha = 0.02;  % given
+k = 50;    % given
 
 
-COP = @(rp) 5.4*(1 - alpha*(rp-1).^2./rp);
-Wc  = @(rp) k*(sqrt(rp) - 1);
+COP = @(rp) 5.4*(1 - alpha*(rp-1).^2./rp); % real coefficient of performance
+Wc  = @(rp) k*(sqrt(rp) - 1);    % compressor work
 
 
-obj = @(rp) -COP(rp);
+obj = @(rp) -COP(rp);  %objective function to maximize COP
 
 
-lb = 1.1;
-ub = 6;
+lb = 1.1;  %lower bound
+ub = 6;    % upper bound
 
 
-rp0 = 2;
+rp0 = 2;   %guess pressure ratio
 
 
-options = optimoptions('fmincon','Display','iter');
-[rp_opt, fval] = fmincon(obj,rp0,[],[],[],[],lb,ub,@entropy_constraint, options);
+options = optimoptions('fmincon','Display','iter');  % optimizations options
+[rp_opt, fval] = fmincon(obj,rp0,[],[],[],[],lb,ub,@entropy_constraint, options); % running the optimizations
 
-COP_opt = COP(rp_opt);
+COP_opt = COP(rp_opt);  % optimized COP at all rp optimized
 
-rp = linspace(1.1,6,400);
-COP_vals = COP(rp);
-Wc_vals  = Wc(rp);
+rp = linspace(1.1,6,400); % pressure ratio length with 400 points in between 
+COP_vals = COP(rp);  % values of COP at all pressure ratio values
+Wc_vals  = Wc(rp);   % compressor work at all pressure ratio values
 
-Sgen = Wc_vals .*(COP_vals.*(1/Th - 1/Tc) + 1/Tc);
+Sgen = Wc_vals .*(COP_vals.*(1/Th - 1/Tc) + 1/Tc);  % entropy generation 
 
-feasible = Sgen <= 0.05;
+feasible = Sgen <= 0.05;   % feasible region
 
 % Plot 1: COP vs pressure ratio
 figure;
@@ -359,6 +372,8 @@ ylabel('COP');
 legend('Feasible','Infeasible');
 title('Feasible Region under Entropy Constraint');
 
+
+% function for energy constraint
 function [c_new, ceq] = entropy_constraint(rp)
 
 Tc = 270;
